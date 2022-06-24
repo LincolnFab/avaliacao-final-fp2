@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="css/cssLayout.css"/>
+        <h:outputStylesheet name="css/primeflex.min.css"/>
+        <title>IFSP</title>
+    </h:head>
+
+    <h:body>
+        <div class="top">
+            <ui:insert name="top">
+                <p:growl id="messages" showDetail="true"/>
+                <p:card style="margin-bottom: 10px; padding-left: 10px">
+                    <p:graphicImage name="img/logo_ifsp_branco_pep.png" />
+                </p:card>
+
+                <h:form>
+                    <p:menubar>
+                        <p:menuitem outcome="/funcionario/home" value="Home" icon="pi pi-home"/>
+
+                        <p:submenu label="Gerenciamento" icon="pi pi-cog">
+                            <p:menuitem outcome="/funcionario/gerenciamento/cliente" value="Clientes" icon="pi pi-users"/>
+                            <p:menuitem outcome="/funcionario/gerenciamento/conta" value="Contas" icon="pi pi-database"/>
+                            <ui:remove>
+                                <p:submenu label="Contas" icon="pi pi-wallet">
+                                    <p:menuitem outcome="/funcionario/gerenciamento/contas/criar" value="Criar" icon="pi pi-database"/>
+                                    <p:menuitem outcome="/funcionario/gerenciamento/contas/alterar" value="Alterar" icon="pi pi-pencil"/>
+                                    <p:menuitem outcome="/funcionario/gerenciamento/contas/consultar" value="Consultar" icon="pi pi-table"/>
+                                    <p:menuitem outcome="/funcionario/gerenciamento/contas/remover" value="Remover" icon="pi pi-trash"/>
+                                </p:submenu>
+                            </ui:remove>
+                            <p:menuitem outcome="/funcionario/gerenciamento/autorizar_deposito" value="Autorizar Depósito" icon="pi pi-check-circle"/>
+                        </p:submenu>
+                        <p:submenu label="Relatórios" icon="pi pi-folder-open">
+                            <p:menuitem outcome="/funcionario/relatorios/relatorio_contas_limite" value="Contas Especiais" icon="pi pi-file-pdf"/>
+                        </p:submenu>
+
+                        <f:facet name="options">
+                            <p:menuButton value="#{funcionarioLoginController.funcionarioAutenticado.nome}" icon="pi pi-user" buttonStyleClass="ui-button-flat ui-button-plain">
+                                <p:menuitem value="Logout" icon="pi pi-power-off" action="#{funcionarioLoginController.logout()}"/>
+                                <p:divider />
+                                <p:menuitem process="@this" oncomplete="PF('alterPasswordDialog').show()" value="Alterar Senha" icon="pi pi-unlock"/>
+                            </p:menuButton>
+                        </f:facet>
+                    </p:menubar>
+
+                    <p:dialog header="Alterar Senha" showEffect="fade" modal="true"
+                              widgetVar="alterPasswordDialog" responsive="true">
+                        <p:outputPanel id="alter-password-content" class="ui-fluid">
+                            <p:outputPanel rendered="#{not empty contaController.conta}">
+
+                                <div class="p-field">
+                                    <p:outputLabel for="nome">Nome</p:outputLabel>
+                                    <p:inputText id="nome" value="#{funcionarioLoginController.funcionarioAutenticado.nome}" disabled="true"/>
+                                </div>
+
+                                <div class="p-field">
+                                    <p:outputLabel for="login">Login</p:outputLabel>
+                                    <p:inputText id="login" value="#{funcionarioLoginController.funcionarioAutenticado.login}" disabled="true"/>
+                                </div>
+
+                                <div class="p-field">
+                                    <p:outputLabel for="senha">Senha do Funcionário</p:outputLabel>
+                                    <p:password id="senha" value="#{funcionarioLoginController.funcionarioAutenticado.senha}" required="true"/>
+                                </div>
+
+                            </p:outputPanel>
+                        </p:outputPanel>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Cadastrar" icon="pi pi-check" actionListener="#{funcionarioLoginController.alterarSenha()}"
+                                             update="alter-password-content" process="alter-password-content @this"/>
+                            <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('alterPasswordDialog').hide()"
+                                             class="ui-button-secondary"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+            </ui:insert>
+        </div>
+
+        <div class="content">
+            <ui:insert name="content">
+                <p:panelGrid columns="2"
+                             columnClasses="ui-grid-col-3,ui-grid-col-9"
+                             layout="grid"
+                             styleClass="ui-panelgrid-blank ui-fluid"
+                             style="border:0px none; background-color:transparent;">
+
+                    <p:row styleClass="my-heading-row">
+                        <p:outputLabel value="Bem vindo #{funcionarioLoginController.funcionarioAutenticado.nome}!"/>
+                    </p:row>
+                </p:panelGrid>
+            </ui:insert>
+        </div>
+
+        <div class="bottom">
+            <ui:insert name="bottom">
+                <p:card style="margin-bottom: 10px; color: whitesmoke">
+                    <center>
+                        Instituto Federal de Educação, Ciência e Tecnologia de São Paulo - Câmpus Presidente Epitácio
+                        <br/>
+                        <br/>
+                        Rua José Ramos Junior, 27-50 - Jardim Tropical - Presidente Epitácio - SP - Brasil - Cep: 19470-000
+                        <br/>
+                        Fone/Fax: (18) 3281-9599/3281-9592. E-mail: pep@ifsp.edu.br
+                    </center>
+                </p:card>
+            </ui:insert>
+        </div>
+    </h:body>
+</html>

@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <ui:composition template="/funcionario/home.xhtml">
+            <ui:define name="content">
+
+                <h:form id="form">
+                    <p:panelGrid columns="2"
+                                 columnClasses="ui-grid-col-12"
+                                 layout="grid"
+                                 style="border: 0px none; background-color:transparent;">
+
+                        <p:row styleClass="my-heading-row">
+                            <p:column styleClass="ui-grid-col-12">
+                                Gerenciar Clientes
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+
+                    <div class="card crud-demo">
+                        <p:growl id="messages" showDetail="true"/>
+
+                        <p:toolbar>
+                            <p:toolbarGroup>
+                                <p:commandButton value="Cadastrar" icon="pi pi-plus" actionListener="#{clienteController.openNew()}"
+                                                 update=":form:create-cliente-content" oncomplete="PF('createClienteDialog').show()"
+                                                 style="margin-right: .5rem">
+                                    <p:resetInput target=":form:edit-cliente-content"/>
+                                </p:commandButton>
+                            </p:toolbarGroup>
+                        </p:toolbar>
+
+                        <p:dataTable id="dt-clientes" widgetVar="dtClientes" var="cliente" value="#{clienteController.clientes}"
+                                     reflow="true" styleClass="clientes-table"
+                                     selection="#{clienteController.clientesSelecionados}" rowKey="#{cliente.cpf}" paginator="true"
+                                     rows="10" paginatorPosition="bottom">
+
+                            <p:column headerText="CPF" sortBy="#{cliente.cpf}" filterBy="#{cliente.cpf}">
+                                <h:outputText value="#{cliente.cpf}"/>
+                            </p:column>
+                            <p:column headerText="Nome" sortBy="#{cliente.nome}" filterBy="#{cliente.nome}">
+                                <h:outputText value="#{cliente.nome}"/>
+                            </p:column>
+                            <p:column headerText="Status" sortBy="#{cliente.status}" filterBy="#{cliente.status}">
+                                <h:outputText value="Ativo" rendered="#{cliente.status}"/>
+                                <h:outputText value="Inativo"  rendered="#{not cliente.status}"/>
+                            </p:column>
+
+                            <p:column exportable="false">
+                                <p:commandButton icon="pi pi-pencil" update=":form:edit-cliente-content"
+                                                 oncomplete="PF('editClienteDialog').show()"
+                                                 styleClass="edit-button rounded-button" process="@this">
+                                    <f:setPropertyActionListener value="#{cliente}" target="#{clienteController.cliente}"/>
+                                    <p:resetInput target=":form:edit-cliente-content"/>
+                                </p:commandButton>
+                                <p:commandButton class="ui-button-danger rounded-button" icon="pi pi-times" process="@this"
+                                                 oncomplete="PF('deleteClienteDialog').show()" style="margin-left: 7px;">
+                                    <f:setPropertyActionListener value="#{cliente}" target="#{clienteController.cliente}"/>
+                                </p:commandButton>
+                                <p:commandButton class="ui-button-success rounded-button" icon="pi pi-check" process="@this"
+                                                 oncomplete="PF('restoreClienteDialog').show()" style="margin-left: 7px;">
+                                    <f:setPropertyActionListener value="#{cliente}" target="#{clienteController.cliente}"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+
+                        <p:dialog header="Cadastrar Cliente" showEffect="fade" modal="true"
+                                  widgetVar="createClienteDialog" responsive="true">
+                            <p:outputPanel id="create-cliente-content" class="ui-fluid">
+                                <p:outputPanel rendered="#{not empty clienteController.cliente}">
+
+                                    <div class="p-field">
+                                        <p:outputLabel for="cpf_create">CPF</p:outputLabel>
+                                        <p:inputMask id="cpf_create" value="#{clienteController.cliente.cpf}" mask="999.999.999-99" validateMask="true" required="true"/>
+                                    </div>
+
+                                    <div class="p-field">
+                                        <p:outputLabel for="nome">Nome</p:outputLabel>
+                                        <p:inputText id="nome" value="#{clienteController.cliente.nome}" required="true"/>
+                                    </div>
+
+                                </p:outputPanel>
+                            </p:outputPanel>
+
+                            <f:facet name="footer">
+                                <p:commandButton value="Cadastrar" icon="pi pi-check" actionListener="#{clienteController.cadastrarCliente()}"
+                                                 update="create-cliente-content" process="create-cliente-content @this"/>
+                                <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('createClienteDialog').hide()"
+                                                 class="ui-button-secondary"/>
+                            </f:facet>
+                        </p:dialog>
+
+                        <p:dialog header="Editar Cliente" showEffect="fade" modal="true"
+                                  widgetVar="editClienteDialog" responsive="true">
+                            <p:outputPanel id="edit-cliente-content" class="ui-fluid">
+                                <p:outputPanel rendered="#{not empty clienteController.cliente}">
+
+                                    <div class="p-field">
+                                        <p:outputLabel for="cpf_edit">CPF</p:outputLabel>
+                                        <p:inputText id="cpf_edit" value="#{clienteController.cliente.cpf}" disabled="true"/>
+                                    </div>
+
+                                    <div class="p-field">
+                                        <p:outputLabel for="nome_edit">Nome</p:outputLabel>
+                                        <p:inputText id="nome_edit" value="#{clienteController.cliente.nome}" required="true"/>
+                                    </div>
+
+                                </p:outputPanel>
+                            </p:outputPanel>
+
+                            <f:facet name="footer">
+                                <p:commandButton value="Editar" icon="pi pi-check" actionListener="#{clienteController.alterarCliente()}"
+                                                 update="edit-cliente-content" process="edit-cliente-content @this"/>
+                                <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('editClienteDialog').hide()"
+                                                 class="ui-button-secondary"/>
+                            </f:facet>
+                        </p:dialog>
+
+                        <p:confirmDialog widgetVar="deleteClienteDialog" showEffect="fade" width="300"
+                                         message="Deseja desativar este cliente?" header="Confirmação" severity="warn">
+                            <p:commandButton value="Sim" icon="pi pi-check" actionListener="#{clienteController.desativarCliente()}"
+                                             process="@this" oncomplete="PF('deleteClienteDialog').hide()"/>
+                            <p:commandButton value="Não" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                             onclick="PF('deleteClienteDialog').hide()"/>
+                        </p:confirmDialog>
+                        
+                        <p:confirmDialog widgetVar="restoreClienteDialog" showEffect="fade" width="300"
+                                         message="Deseja reativar este cliente?" header="Confirmação" severity="warn">
+                            <p:commandButton value="Sim" icon="pi pi-check" actionListener="#{clienteController.reativarCliente()}"
+                                             process="@this" oncomplete="PF('restoreClienteDialog').hide()"/>
+                            <p:commandButton value="Não" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                             onclick="PF('deleteClienteDialog').hide()"/>
+                        </p:confirmDialog>
+
+                        <p:confirmDialog global="true" showEffect="fade" width="300">
+                            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary"
+                                             icon="pi pi-times"/>
+                        </p:confirmDialog>
+                    </div>
+
+                </h:form>
+
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

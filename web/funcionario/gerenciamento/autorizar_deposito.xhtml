@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <ui:composition template="/funcionario/home.xhtml">
+            <ui:define name="content">
+
+
+                <h:form id="form">
+                    <p:panelGrid columns="2"
+                                 columnClasses="ui-grid-col-12"
+                                 layout="grid"
+                                 style="border: 0px none; background-color:transparent;">
+
+                        <p:row styleClass="my-heading-row">
+                            <p:column styleClass="ui-grid-col-12">
+                                Autorizar Depósito
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+
+                    <div class="card crud-demo">
+                        <p:growl id="messages" showDetail="true"/>
+
+                        <p:dataTable id="dt-depositos" widgetVar="dtDepositos" var="deposito" value="#{operacaoController.depositosPendentes}"
+                                     reflow="true" styleClass="depositos-table"
+                                     selection="#{operacaoController.depositosSelecionado}" rowKey="#{deposito.operacaoPK.id}" paginator="true"
+                                     rows="10" paginatorPosition="bottom">
+
+                            <p:column headerText="ID" sortBy="#{deposito.operacaoPK.id}" filterBy="#{deposito.operacaoPK.id}">
+                                <h:outputText value="#{deposito.operacaoPK.id}"/>
+                            </p:column>
+                            <p:column headerText="Num. Conta" sortBy="#{deposito.operacaoPK.contaId}" filterBy="#{deposito.operacaoPK.contaId}">
+                                <h:outputText value="#{deposito.operacaoPK.contaId}"/>
+                            </p:column>
+                            <p:column headerText="Num. Agência" sortBy="#{deposito.operacaoPK.contaAgenciaId}" filterBy="#{deposito.operacaoPK.contaAgenciaId}">
+                                <h:outputText value="#{deposito.operacaoPK.contaAgenciaId}"/>
+                            </p:column>
+                            <p:column headerText="Data" sortBy="#{deposito.data}" filterBy="#{deposito.data}">
+                                <h:outputText value="#{deposito.data}" >
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Valor" sortBy="#{deposito.valor}">
+                                <h:outputText  value="#{deposito.valor}">
+                                    <f:convertNumber currencySymbol="R$" type="currency"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Status" sortBy="#{deposito.status}" filterBy="#{deposito.status}">
+                                <h:outputText value="Pendente"  rendered="#{not deposito.status}"/>
+                            </p:column>
+
+                            <p:column exportable="false">
+                                <p:commandButton class="ui-button-success rounded-button" icon="pi pi-check" process="@this"
+                                                 oncomplete="PF('aceptDpositDialog').show()" style="margin-left: 7px;">
+                                    <f:setPropertyActionListener value="#{deposito}" target="#{operacaoController.operacao}"/>
+                                </p:commandButton>
+
+                                <ui:remove>
+                                    <p:commandButton class="ui-button-danger rounded-button" icon="pi pi-times" process="@this"
+                                                     oncomplete="PF('rejectDpositDialog').show()" style="margin-left: 7px;">
+                                        <f:setPropertyActionListener value="#{deposito}" target="#{operacaoController.operacao}"/>
+                                    </p:commandButton>
+                                </ui:remove>
+                            </p:column>
+                        </p:dataTable>
+                        <ui:remove>
+                            <p:confirmDialog widgetVar="rejectDpositDialog" showEffect="fade" width="300"
+                                             message="Rejeitar Depósito?" header="Confirmação" severity="warn">
+                                <p:commandButton value="Sim" icon="pi pi-check" actionListener="#{operacaoController.rejeitarDeposito()}"
+                                                 process="@this" oncomplete="PF('rejectDpositDialog').hide()"/>
+                                <p:commandButton value="Não" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                                 onclick="PF('rejectDpositDialog').hide()"/>
+                            </p:confirmDialog>
+                        </ui:remove>
+                        <p:confirmDialog widgetVar="aceptDpositDialog" showEffect="fade" width="300"
+                                         message="Autorizar Depósito?" header="Confirmação" severity="warn">
+                            <p:commandButton value="Sim" icon="pi pi-check" actionListener="#{operacaoController.autorizarDeposito()}"
+                                             process="@this" oncomplete="PF('aceptDpositDialog').hide()"/>
+                            <p:commandButton value="Não" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                             onclick="PF('aceptDpositDialog').hide()"/>
+                        </p:confirmDialog>
+                    </div>
+
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

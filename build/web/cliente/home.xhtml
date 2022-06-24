@@ -1,0 +1,166 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="css/cssLayout.css"/>
+        <h:outputStylesheet name="css/primeflex.min.css"/>
+        <title>IFSP</title>
+    </h:head>
+
+    <h:body>
+        <div class="top">
+            <ui:insert name="top">
+                <p:growl id="messages" showDetail="true"/>
+                <p:card style="margin-bottom: 10px; padding-left: 10px">
+                    <p:graphicImage name="img/logo_ifsp_branco_pep.png" />
+                </p:card>
+
+                <h:form>
+                    <p:menubar>
+                        <p:menuitem outcome="/cliente/home" value="Home" icon="pi pi-home"/>
+                        <p:menuitem outcome="/cliente/saque" value="Saque" icon="pi pi-wallet"/>
+                        <p:submenu label="Depósito" icon="pi pi-upload">
+                            <p:menuitem outcome="/cliente/deposito_caixa" value="Caixa Eletrônico" icon="pi pi-box"/>
+                            <p:menuitem outcome="/cliente/deposito_atendente" value="Atendente" icon="pi pi-user-plus"/>
+                        </p:submenu>
+                        <p:menuitem outcome="/cliente/transferencia" value="Transferência" icon="pi pi-sort-alt"/>
+                        <!--
+                        <p:divider layout="vertical"/>
+                        <p:submenu label="#{controller.userLogin.login}" icon="pi pi-user">
+                            <p:menuitem value="Logout" icon="pi pi-power-off" action="#{controller.logout()}"/>
+                            <p:divider />
+                            <p:menuitem value="Alterar Senha" icon="pi pi-unlock"/>
+                        </p:submenu>
+                        -->
+                        <f:facet name="options">
+                            <p:menuButton value="#{contaLoginController.contaAutenticada.clienteCpf.nome}" icon="pi pi-user" buttonStyleClass="ui-button-flat ui-button-plain">
+                                <p:menuitem value="Logout" icon="pi pi-power-off" action="#{contaLoginController.logout()}"/>
+                                <p:divider />
+                                <p:menuitem process="@this" oncomplete="PF('alterPasswordDialog').show()" value="Alterar Senha" icon="pi pi-unlock"/>
+                            </p:menuButton>
+                        </f:facet>
+                    </p:menubar>
+
+                    <p:dialog header="Alterar Senha" showEffect="fade" modal="true"
+                              widgetVar="alterPasswordDialog" responsive="true">
+                        <p:outputPanel id="alter-password-content" class="ui-fluid">
+                            <p:outputPanel rendered="#{not empty contaController.conta}">
+
+                                <div class="p-field">
+                                    <p:outputLabel for="num_conta">Num. Conta</p:outputLabel>
+                                    <p:inputText id="num_conta" value="#{contaLoginController.contaAutenticada.contaPK.id}" disabled="true"/>
+                                </div>
+
+                                <div class="p-field">
+                                    <p:outputLabel for="num_agencia">Num. Agência</p:outputLabel>
+                                    <p:inputText id="num_agencia" value="#{contaLoginController.contaAutenticada.contaPK.agenciaId}" disabled="true"/>
+                                </div>
+
+                                <div class="p-field">
+                                    <p:outputLabel for="senha">Senha da Conta</p:outputLabel>
+                                    <p:password id="senha" value="#{contaLoginController.contaAutenticada.senha}" required="true"/>
+                                </div>
+
+                            </p:outputPanel>
+                        </p:outputPanel>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Alterar" icon="pi pi-check" actionListener="#{contaLoginController.alterarSenha()}"
+                                             update="alter-password-content" process="alter-password-content @this"/>
+                            <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('alterPasswordDialog').hide()"
+                                             class="ui-button-secondary"/>
+                        </f:facet>
+                    </p:dialog>
+                </h:form>
+            </ui:insert>
+        </div>
+
+        <div class="content">
+            <ui:insert name="content">
+                <p:panelGrid columns="2"
+                             columnClasses="ui-grid-col-3,ui-grid-col-9"
+                             layout="grid"
+                             styleClass="ui-panelgrid-blank ui-fluid"
+                             style="border:0px none; background-color:transparent;">
+
+                    <p:row styleClass="my-heading-row">
+                        <p:outputLabel value="Bem vindo #{contaLoginController.contaAutenticada.clienteCpf.nome}!"/>
+                        <h:outputText id="saldo" style="position: absolute;right: 4%;" value="Saldo: R$ #{contaLoginController.contaAutenticada.saldo}"/>
+                    </p:row>
+                </p:panelGrid>
+
+                <h:form id="form">
+                    <p:toolbar>
+                        <p:toolbarGroup>
+                            <p:panelGrid columns="3"
+                                         columnClasses="ui-grid-col-5, ui-grid-col-6, ui-grid-col-3"
+                                         layout="grid"
+                                         styleClass="ui-panelgrid-blank ui-fluid"
+                                         style="border:0px none; background-color:transparent;">
+                                <p:outputLabel for="periodo" value="Selecione o Período"/>
+                                <p:datePicker id="periodo" selectionMode="range" value="#{operacaoController.periodo}" readonlyInput="true"/>
+                                <p:commandButton value="Buscar" update="messages, dt-extrato" action="#{operacaoController.extratoPeriodo()}"></p:commandButton>
+                            </p:panelGrid>
+                        </p:toolbarGroup>
+                    </p:toolbar>
+
+                    <div class="card">
+                        <p:dataTable id="dt-extrato" widgetVar="dtExtrato" var="extrato"  reflow="true"
+                                     styleClass="extrato-table" value="#{operacaoController.extrato}"
+                                     rowKey="#{extrato.operacaoPK.id}" paginator="true"
+                                     rows="10" paginatorPosition="bottom">
+                            <p:column headerText="ID Operação" sortBy="#{extrato.operacaoPK.id}" filterBy="#{extrato.operacaoPK.id}">
+                                <h:outputText value="#{extrato.operacaoPK.id}" />
+                            </p:column>
+
+                            <p:column headerText="Operação" sortBy="#{extrato.tipoOperacao}" filterBy="#{extrato.tipoOperacao}">
+                                <h:outputText value="#{extrato.tipoOperacao}" />
+                            </p:column>
+
+                            <p:column headerText="Conta Destino" sortBy="#{extrato.contaIdDestino}" filterBy="#{extrato.contaIdDestino}">
+                                <h:outputText value="#{extrato.contaIdDestino}" />
+                            </p:column>
+
+                            <p:column headerText="Agência Destino" sortBy="#{extrato.agenciaIdDestino}" filterBy="#{extrato.agenciaIdDestino}">
+                                <h:outputText value="#{extrato.agenciaIdDestino}" />
+                            </p:column>
+
+                            <p:column headerText="Data" sortBy="#{extrato.data}" filterBy="#{extrato.data}">
+                                <h:outputText value="#{extrato.data}" >
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Valor" sortBy="#{extrato.valor}" filterBy="#{extrato.valor}">
+                                <h:outputText value="#{extrato.valor}" >
+                                    <f:convertNumber currencySymbol="R$" type="currency"/>
+                                </h:outputText>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </h:form>
+            </ui:insert>
+        </div>
+
+        <div class="bottom">
+            <ui:insert name="bottom">
+                <p:card style="margin-bottom: 10px; color: whitesmoke">
+                    <center>
+                        Instituto Federal de Educação, Ciência e Tecnologia de São Paulo - Câmpus Presidente Epitácio
+                        <br/>
+                        <br/>
+                        Rua José Ramos Junior, 27-50 - Jardim Tropical - Presidente Epitácio - SP - Brasil - Cep: 19470-000
+                        <br/>
+                        Fone/Fax: (18) 3281-9599/3281-9592. E-mail: pep@ifsp.edu.br
+                    </center>
+                </p:card>
+            </ui:insert>
+        </div>
+    </h:body>
+</html>

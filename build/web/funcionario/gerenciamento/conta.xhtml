@@ -1,0 +1,149 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <ui:composition template="/funcionario/home.xhtml">
+            <ui:define name="content">
+
+                <h:form id="form">
+                    <p:panelGrid columns="2"
+                                 columnClasses="ui-grid-col-12"
+                                 layout="grid"
+                                 style="border: 0px none; background-color:transparent;">
+
+                        <p:row styleClass="my-heading-row">
+                            <p:column styleClass="ui-grid-col-12">
+                                Gerenciar Contas
+                            </p:column>
+                        </p:row>
+                    </p:panelGrid>
+
+                    <div class="card crud-demo">
+                        <p:growl id="messages" showDetail="true"/>
+
+                        <p:toolbar>
+                            <p:toolbarGroup>
+                                <p:commandButton value="Criar" icon="pi pi-plus" actionListener="#{contaController.openNew()}"
+                                                 update=":form:create-conta-content" oncomplete="PF('createContaDialog').show()"
+                                                 style="margin-right: .5rem">
+                                    <p:resetInput target=":form:create-conta-content"/>
+                                </p:commandButton>
+                            </p:toolbarGroup>
+                        </p:toolbar>
+
+                        <p:dataTable id="dt-contas" widgetVar="dtContas" var="conta" value="#{contaController.contas}"
+                                     reflow="true" styleClass="contas-table" rowKey="#{conta.contaPK.id}" paginator="true"
+                                     rows="10" paginatorPosition="bottom">
+                            <p:column headerText="N. da Conta" sortBy="#{conta.contaPK.id}" filterBy="#{conta.contaPK.id}">
+                                <h:outputText value="#{conta.contaPK.id}"/>
+                            </p:column>
+                            <p:column headerText="N. da Agência" sortBy="#{conta.contaPK.agenciaId}" filterBy="#{conta.contaPK.agenciaId}">
+                                <h:outputText value="#{conta.contaPK.agenciaId}"/>
+                            </p:column>
+                            <p:column headerText="Tipo" sortBy="#{conta.tipoConta}" filterBy="#{conta.tipoConta}">
+                                <h:outputText value="#{conta.tipoConta}" />
+                            </p:column>
+                            <p:column headerText="CPF" sortBy="#{conta.clienteCpf.cpf}" filterBy="#{conta.clienteCpf.cpf}">
+                                <h:outputText value="#{conta.clienteCpf.cpf}"/>
+                            </p:column>
+                            <p:column headerText="Saldo" sortBy="#{conta.saldo}">
+                                <h:outputText  value="#{conta.saldo}">
+                                    <f:convertNumber currencySymbol="R$" type="currency"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Limite" sortBy="#{conta.limite}">
+                                <h:outputText  value="#{conta.limite}">
+                                    <f:convertNumber currencySymbol="R$" type="currency"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Status" sortBy="#{conta.status}">
+                                <h:outputText value="Ativa" rendered="#{conta.status}"/>
+                                <h:outputText value="Inativa" rendered="#{not conta.status}"/>
+                            </p:column>
+
+                            <p:column exportable="false">                                
+                                <p:commandButton class="ui-button-danger rounded-button" icon="pi pi-times" process="@this"
+                                                 oncomplete="PF('deleteContaDialog').show()" style="margin-left: 7px;">
+                                    <f:setPropertyActionListener value="#{conta}" target="#{contaController.conta}"/>
+                                </p:commandButton>
+                                <p:commandButton class="ui-button-success rounded-button" icon="pi pi-check" process="@this"
+                                                 oncomplete="PF('restoreContaDialog').show()" style="margin-left: 7px;">
+                                    <f:setPropertyActionListener value="#{conta}" target="#{contaController.conta}"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+
+                        <p:dialog header="Criar Conta" showEffect="fade" modal="true"
+                                  widgetVar="createContaDialog" responsive="true">
+                            <p:outputPanel id="create-conta-content" class="ui-fluid">
+                                <p:outputPanel rendered="#{not empty contaController.conta}">
+
+                                    <div class="p-field" >
+                                        <p:selectOneRadio id="tipo_create" value="#{contaController.conta.tipoConta}" unselectable="false">
+                                            <f:selectItem itemLabel="Comum" itemValue="comum"/>
+                                            <f:selectItem itemLabel="Especial" itemValue="especial"/>
+                                            <p:ajax process="tipo_create" update="@form" oncomplete="PF('createContaDialog').show()"/>
+                                        </p:selectOneRadio>
+
+                                        <p:outputLabel value="Limite" rendered="#{contaController.conta.tipoConta eq 'especial'}"/>
+                                        <p:inputNumber value="#{contaController.conta.limite}" symbol="R$ "
+                                                       decimalSeparator="," thousandSeparator="."
+                                                       required="#{contaController.conta.tipoConta eq 'especial'}"
+                                                       rendered="#{contaController.conta.tipoConta eq 'especial'}"/>
+                                    </div>
+
+                                    <div class="p-field">
+                                        <p:outputLabel for="cpf">CPF do Cliente</p:outputLabel>
+                                        <p:inputMask id="cpf" value="#{contaController.conta.clienteCpf.cpf}" mask="999.999.999-99" validateMask="true" required="true"/>
+                                    </div>
+
+                                    <div class="p-field">
+                                        <p:outputLabel for="senha_create">Senha da Conta</p:outputLabel>
+                                        <p:password id="senha_create" value="#{contaController.conta.senha}" required="true"/>
+                                    </div>
+
+                                </p:outputPanel>
+                            </p:outputPanel>
+
+                            <f:facet name="footer">
+                                <p:commandButton value="Criar" icon="pi pi-check" actionListener="#{contaController.criarConta()}"
+                                                 update="create-conta-content" process="create-conta-content @this"/>
+                                <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('createContaDialog').hide()"
+                                                 class="ui-button-secondary"/>
+                            </f:facet>
+                        </p:dialog>
+
+                        <p:confirmDialog widgetVar="deleteContaDialog" showEffect="fade" width="300"
+                                         message="Deseja desativar esta conta?" header="Confirmação" severity="warn">
+                            <p:commandButton value="Sim" icon="pi pi-check" actionListener="#{contaController.desativarConta()}"
+                                             process="@this" oncomplete="PF('deleteContaDialog').hide()"/>
+                            <p:commandButton value="Não" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                             onclick="PF('deleteContaDialog').hide()"/>
+                        </p:confirmDialog>
+
+                        <p:confirmDialog widgetVar="restoreContaDialog" showEffect="fade" width="300"
+                                         message="Deseja reativar esta conta?" header="Confirmação" severity="warn">
+                            <p:commandButton value="Sim" icon="pi pi-check" actionListener="#{contaController.reativarConta()}"
+                                             process="@this" oncomplete="PF('restoreContaDialog').hide()"/>
+                            <p:commandButton value="Não" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                             onclick="PF('restoreContaDialog').hide()"/>
+                        </p:confirmDialog>
+
+                        <p:confirmDialog global="true" showEffect="fade" width="300">
+                            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary"
+                                             icon="pi pi-times"/>
+                        </p:confirmDialog>
+                    </div>
+
+                </h:form>
+
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
