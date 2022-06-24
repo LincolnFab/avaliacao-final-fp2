@@ -1,1 +1,8 @@
 model/Cliente_.java
+model/OperacaoPK_.java
+model/Conta_.java
+model/ContaPK_.java
+model/Operacao_.java
+model/Banco_.java
+model/Funcionario_.java
+model/Agencia_.java

@@ -197,7 +197,7 @@ public class OperacaoController implements Serializable {
     }
 
     public void extratoPeriodo() {
-        this.extrato = operacaoDAO.buscarPorPeriodo(periodo.get(0), periodo.get(1));
+        this.extrato = operacaoDAO.buscarPorPeriodo(conta.getContaPK().getId(), conta.getContaPK().getAgenciaId(), periodo.get(0), periodo.get(1));
         if (this.extrato.size() == 0) {
             Util.addMessageWarning("Não foram realizadas operações no período selecionado");
         } else {

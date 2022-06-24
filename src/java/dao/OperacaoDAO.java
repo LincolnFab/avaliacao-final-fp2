@@ -24,9 +24,11 @@ public class OperacaoDAO extends AbstractDAO<Operacao> {
                 .getResultList();
     }
 
-    public List<Operacao> buscarPorPeriodo(Date data_ini, Date data_fin) {
+    public List<Operacao> buscarPorPeriodo(int contaId, int contaAgenciaId, Date data_ini, Date data_fin) {
         return getEntityManager()
-                .createQuery("SELECT o FROM Operacao o WHERE o.data >= :data_ini AND o.data <= :data_fin", Operacao.class)
+                .createQuery("SELECT o FROM Operacao o WHERE (o.operacaoPK.contaId = :id_conta AND o.operacaoPK.contaAgenciaId = :id_agencia) AND (o.data >= :data_ini AND o.data <= :data_fin)", Operacao.class)
+                .setParameter("id_conta", contaId)
+                .setParameter("id_agencia", contaAgenciaId)
                 .setParameter("data_ini", data_ini)
                 .setParameter("data_fin", data_fin)
                 .getResultList();
